@@ -21,7 +21,7 @@ contract Charity{
         owner = msg.sender;
     }
     
-    mapping(address=>uint8) doners;
+    mapping(address=>uint8) donors;
     
     // @dev struct to store collection of donations given to one organization
     // and store its Impact
@@ -46,7 +46,7 @@ contract Charity{
     function() payable public{
         multipurposeBalance = multipurposeBalance.add(msg.value);
         totalDonations = totalDonations.add(msg.value);
-        doners[msg.sender] = 1;
+        donors[msg.sender] = 1;
         emit Donated(msg.sender, msg.value, "fallback");
     }
     
@@ -60,7 +60,7 @@ contract Charity{
     function donate(address from, uint amount, string org) payable public{
         require(from == msg.sender);
         require(amount > 0);
-        doners[msg.sender] = 1;
+        donors[msg.sender] = 1;
         //impactIdCounter++;
         Mission storage mission = missions[org];
         mission.amount = mission.amount.add(amount);
