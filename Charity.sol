@@ -16,6 +16,7 @@ contract Charity{
     }
     
     event Donated(address from, uint amount, string organization);
+    event Given(address to, uint amount, string organization);
     
     constructor() public{
         owner = msg.sender;
@@ -26,9 +27,8 @@ contract Charity{
     // @dev struct to store collection of donations given to one organization
     // and store its Impact
     struct Mission{
-        //uint impactId;
-        address[] givers;
-        //mapping(address=>uint8) impacters;
+        address[] contributors;
+        uint contributorCount;
         uint amount;
         string organization;
         uint date;
@@ -50,6 +50,7 @@ contract Charity{
         emit Donated(msg.sender, msg.value, "fallback");
     }
     
+    //@dev allows owner to create new mission with org name
     function createImpact(string organization) isOwner private{
         Mission memory mission;
         mission.organization = organization;
@@ -57,19 +58,27 @@ contract Charity{
         missionCounter++;
     }
     
+    //@dev contributors donate to their specific mission via organization name
     function donate(address from, uint amount, string org) payable public{
         require(from == msg.sender);
         require(amount > 0);
         donors[msg.sender] = 1;
-        //impactIdCounter++;
         Mission storage mission = missions[org];
         mission.amount = mission.amount.add(amount);
-        mission.givers.push(from);
+        mission.contributors.push(from);
+        mission.contributorCount = mission.contributorCount.add(1);
         mission.date = now;
+        emit Donated(from, amount, org);
     }
     
+    //@dev owner distributes specific mission's amount
     function giveBack(address to, uint amount, string org) isOwner public{
-        require(amount < totalDonations);
+        Mission storage mission = missions[org];
+        require(mission.contributorCount != 0x0);
+        require(mission.amount < amount);
+        to.transfer(amount);
+        totalDonations = totalDonations.sub(amount);
+        emit Given(to, amount, org);
     }
     
     
