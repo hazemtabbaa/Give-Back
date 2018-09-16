@@ -32,6 +32,8 @@ contract Charity{
         uint amount;
         string organization;
         uint date;
+        uint fundGoal;
+        address requester;
     }
     
     mapping(string => Mission) missions;
@@ -56,19 +58,6 @@ contract Charity{
         mission.organization = organization;
         missions[organization] = mission;
         missionCounter++;
-    }
-    
-    //@dev contributors donate to their specific mission via organization name
-    function donate(address from, uint amount, string org) payable public{
-        require(from == msg.sender);
-        require(amount > 0);
-        donors[msg.sender] = 1;
-        Mission storage mission = missions[org];
-        mission.amount = mission.amount.add(amount);
-        mission.contributors.push(from);
-        mission.contributorCount = mission.contributorCount.add(1);
-        mission.date = now;
-        emit Donated(from, amount, org);
     }
     
     //@dev owner distributes specific mission's amount
