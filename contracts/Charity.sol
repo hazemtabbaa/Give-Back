@@ -9,6 +9,7 @@ contract Charity{
     uint public totalDonations;
     uint public multipurposeBalance;
     uint public missionCounter;
+    //uint comment;
 
     modifier isOwner{
         require(msg.sender == owner);
