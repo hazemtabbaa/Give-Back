@@ -6,7 +6,7 @@ contract Charity{
     using SafeMath for uint;
 
     address private owner;
-    uint public totalDonations;
+    //uint public totalDonations;
     uint public multipurposeBalance;
     uint public missionCounter;
     //uint comments;
@@ -24,6 +24,7 @@ contract Charity{
         owner = msg.sender;
     }
 
+    //@dev map to store if address has donated or not
     mapping(address=>uint8) donors;
 
     // @dev struct to store collection of donations given to one organization
@@ -48,9 +49,10 @@ contract Charity{
     }*/
 
     //@dev fallback for any donation received, used for multipurpose balance
+    //TODO check if fallback should be removed
     function() payable public{
         multipurposeBalance = multipurposeBalance.add(msg.value);
-        totalDonations = totalDonations.add(msg.value);
+        //totalDonations = totalDonations.add(msg.value);
         donors[msg.sender] = 1;
         emit Donated(msg.sender, msg.value, "fallback");
     }
@@ -71,7 +73,7 @@ contract Charity{
         require(mission.amountBalance > amount);
         require(address(this).balance >= amount);
         to.transfer(amount);
-        totalDonations = totalDonations.sub(amount);
+        //totalDonations = totalDonations.sub(amount);
         mission.amountBalance = mission.amountBalance.sub(amount);
         emit Given(to, amount, org);
     }
