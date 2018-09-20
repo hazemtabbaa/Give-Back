@@ -9,6 +9,8 @@ contract Contributions is Charity{
 
     //Mission[] public requested;
     mapping(string => Mission) requested;
+    //@dev map to store total contributions of specific address
+    mapping(address=>uint) donorContributions;
 
     //@dev allows user to request a mission to be added to charity
     //add requested mission to list of waiting for approval
@@ -31,18 +33,27 @@ contract Contributions is Charity{
     }
 
     //@dev contributors donate to their specific mission via organization name
-    function donate( string org) payable public{
+    function donate(string org) payable public{
         uint amount = msg.value;
         require(amount > 0);
         donors[msg.sender] = 1;
         Mission storage mission = missions[org];
         require(mission.fundGoal < (mission.fundGoal.add(amount)));
         mission.amountBalance = mission.amountBalance.add(amount);
-        totalDonations = totalDonations.add(amount);
+        //totalDonations = totalDonations.add(amount);
         mission.contributors.push(msg.sender);
         mission.contributorCount = mission.contributorCount.add(1);
         mission.date = now;
+        donorContributions[msg.sender] = donorContributions[msg.sender].add(msg.value);
         emit Donated(msg.sender, amount, org);
+    }
+
+    //@dev allow donations without specific organization
+    function genericDonation() payable public{
+      multipurposeBalance = multipurposeBalance.add(msg.value);
+      //totalDonations = totalDonations.add(msg.value);
+      donors[msg.sender] = 1;
+      emit Donated(msg.sender, msg.value, "generic");
     }
 
     //@dev return mission balance
