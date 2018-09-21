@@ -63,7 +63,7 @@ contract Contributions is Charity{
         return mission.amountBalance;
     }
     //@dev get total amount donated since the beginning
-    // i.e. disregarding "give-backs"
+    // i.e. disregarding "give-backs" 
     function getMissionTotalDonations(string org) public view returns(uint){
       Mission storage mission = missions[org];
       require(mission.amountDonated > 0);
