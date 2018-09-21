@@ -41,7 +41,9 @@ contract Contributions is Charity{
         require(mission.fundGoal > (mission.amountDonated.add(amount)));
         mission.amountBalance = mission.amountBalance.add(amount);
         //totalDonations = totalDonations.add(amount);
-        mission.contributors.push(msg.sender);
+        //mission.contributors.push(msg.sender);
+        mission.contributors[msg.sender] = 1;
+        mission.addressDonations[msg.sender] = mission.addressDonations[msg.sender].add(amount);
         mission.contributorCount = mission.contributorCount.add(1);
         mission.date = now;
         mission.amountDonated = mission.amountDonated.add(amount);
