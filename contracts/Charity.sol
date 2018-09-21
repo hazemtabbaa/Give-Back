@@ -38,7 +38,7 @@ contract Charity{
         uint contributorCount;
         //amountBalance eth left in balance to give back
         uint amountBalance;
-        uint amountDonated
+        uint amountDonated;
         string organization;
         uint date;
         uint fundGoal;
