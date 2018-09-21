@@ -40,13 +40,11 @@ contract Contributions is Charity{
         Mission storage mission = missions[org];
         require(mission.fundGoal > (mission.amountDonated.add(amount)));
         mission.amountBalance = mission.amountBalance.add(amount);
-        mission.amountDonated = mission.amountDonated.add(amount);
         //totalDonations = totalDonations.add(amount);
-        //mission.contributors.push(msg.sender);
-        mission.contributors[msg.sender] = 1;
-        mission.addressDonations[msg.sender] = mission.addressDonations[msg.sender].add(msg.value);
+        mission.contributors.push(msg.sender);
         mission.contributorCount = mission.contributorCount.add(1);
         mission.date = now;
+        mission.amountDonated = mission.amountDonated.add(amount);
         donorContributions[msg.sender] = donorContributions[msg.sender].add(msg.value);
         emit Donated(msg.sender, amount, org);
     }
@@ -64,8 +62,7 @@ contract Contributions is Charity{
         Mission storage mission = missions[org];
         return mission.amountBalance;
     }
-
-    //@dev get total amount donated to mission since the beginning
+    //@dev get total amount donated since the beginning
     // i.e. disregarding "give-backs"
     function getMissionTotalDonations(string org) public view returns(uint){
       Mission storage mission = missions[org];
