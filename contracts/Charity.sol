@@ -31,9 +31,14 @@ contract Charity{
     // and store its Impact
     struct Mission{
         //address receiver;
-        address[] contributors;
+        //TODO get Contributor amount
+        mapping(address => uint8) contributors;
+        mapping(address => uint) addressDonations;
+        //address[] contributors;
         uint contributorCount;
+        //amountBalance eth left in balance to give back
         uint amountBalance;
+        uint amountDonated
         string organization;
         uint date;
         uint fundGoal;
@@ -74,6 +79,7 @@ contract Charity{
         require(address(this).balance >= amount);
         to.transfer(amount);
         //totalDonations = totalDonations.sub(amount);
+        //mission.fundGoal = mission.fundGoal.sub(amount);
         mission.amountBalance = mission.amountBalance.sub(amount);
         emit Given(to, amount, org);
     }
