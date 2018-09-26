@@ -38,6 +38,9 @@ contract Contributions is Charity{
         require(amount > 0);
         donors[msg.sender] = 1;
         Mission storage mission = missions[org];
+        //TODO fix require:
+        //Add fundgoal function or add in instantiation otherwise donate
+        //will revert on require since fundGoal = 0
         require(mission.fundGoal > (mission.amountDonated.add(amount)));
         mission.amountBalance = mission.amountBalance.add(amount);
         //totalDonations = totalDonations.add(amount);
