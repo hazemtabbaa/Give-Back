@@ -46,27 +46,21 @@ contract Charity{
     }
 
     mapping(string => Mission) missions;
-    //Impact[] public impacts;
-
-    // @dev return total donations
-    /*function getTotalDonations() public view returns(uint){
-        return totalDonations;
-    }*/
 
     //@dev fallback for any donation received, used for multipurpose balance
     //TODO check if fallback should be removed
     function() payable public{
         multipurposeBalance = multipurposeBalance.add(msg.value);
-        //totalDonations = totalDonations.add(msg.value);
         donors[msg.sender] = 1;
         emit Donated(msg.sender, msg.value, "fallback");
     }
 
     //@dev allows owner to create new mission with org name
-    function createMission(string organization) isOwner public{
+    function createMission(string _organization, uint _fundGoal) isOwner public{
         Mission memory mission;
-        mission.organization = organization;
+        mission.organization = _organization;
         //mission.receiver = recAddress;
+        mission.fundGoal = _fundGoal
         missions[organization] = mission;
         missionCounter++;
     }
@@ -78,7 +72,6 @@ contract Charity{
         require(mission.amountBalance > amount);
         require(address(this).balance >= amount);
         to.transfer(amount);
-        //totalDonations = totalDonations.sub(amount);
         //mission.fundGoal = mission.fundGoal.sub(amount);
         mission.amountBalance = mission.amountBalance.sub(amount);
         emit Given(to, amount, org);
@@ -86,6 +79,17 @@ contract Charity{
 
     function getBalance() view public returns(uint){
         return address(this).balance;
+    }
+
+    function getGenericDonations() view public returns(uint){
+      return multipurposeBalance;
+    }
+
+    //@dev allow owner to change fundGoal for mission
+    function addFundGoal(string _org, uint _fundGoal) isOwner public returns(uint){
+       Mission storage mission = missions[org];
+       mission.fundGoal = mission.fundGoal.add(_fundGoal);
+       return mission.fundGoal;
     }
 
 
