@@ -18,11 +18,20 @@ contract Charity{
 
     event Donated(address from, uint amount, string organization);
     event Given(address to, uint amount, string organization);
+    event CreatedMission(string org, uint fundGoal);
+    event AddedFundGoal(string org, uint fundGoal);
 
     constructor() public{
         //TODO add balance
         owner = msg.sender;
     }
+
+    //TODO
+    //maybe add mission address in struct or in createMission
+    //instead of manual input of address in giveBack
+
+    //TODO
+    //fix indexed keyword in events
 
     //@dev map to store if address has donated or not
     mapping(address=>uint8) donors;
@@ -63,6 +72,7 @@ contract Charity{
         mission.fundGoal = _fundGoal
         missions[organization] = mission;
         missionCounter++;
+        emit CreatedMission(_organization, _fundGoal);
     }
 
     //@dev owner distributes specific mission's amount
@@ -89,6 +99,7 @@ contract Charity{
     function addFundGoal(string _org, uint _fundGoal) isOwner public returns(uint){
        Mission storage mission = missions[org];
        mission.fundGoal = mission.fundGoal.add(_fundGoal);
+       emit AddedFundGoal(_org, _fundGoal);
        return mission.fundGoal;
     }
 
