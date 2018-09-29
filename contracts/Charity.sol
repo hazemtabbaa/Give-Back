@@ -16,10 +16,10 @@ contract Charity{
         _;
     }
 
-    event Donated(address from, uint amount, string organization);
-    event Given(address to, uint amount, string organization);
-    event CreatedMission(string org, uint fundGoal);
-    event AddedFundGoal(string org, uint fundGoal);
+    event Donated(indexed address from, uint amount, string organization);
+    event Given(indexed address to, uint amount, string organization);
+    event CreatedMission(indexed string org, uint fundGoal);
+    event AddedFundGoal(indexed string org, uint fundGoal);
 
     constructor() public{
         //TODO add balance
@@ -87,13 +87,6 @@ contract Charity{
         emit Given(to, amount, org);
     }
 
-    function getBalance() view public returns(uint){
-        return address(this).balance;
-    }
-
-    function getGenericDonations() view public returns(uint){
-      return multipurposeBalance;
-    }
 
     //@dev allow owner to change fundGoal for mission
     function addFundGoal(string _org, uint _fundGoal) isOwner public returns(uint){
@@ -101,6 +94,14 @@ contract Charity{
        mission.fundGoal = mission.fundGoal.add(_fundGoal);
        emit AddedFundGoal(_org, _fundGoal);
        return mission.fundGoal;
+    }
+
+    function getBalance() view public returns(uint){
+        return address(this).balance;
+    }
+
+    function getGenericDonations() view public returns(uint){
+      return multipurposeBalance;
     }
 
 
