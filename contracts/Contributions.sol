@@ -4,8 +4,8 @@ import "./SafeMath.sol";
 
 contract Contributions is Charity{
     using SafeMath for uint;
-    event Request(indexed address from, string org);
-    event Approve(indexed string org);
+    event Request(address indexed from, string org);
+    event Approve(string indexed org);
 
     //Mission[] public requested;
     mapping(string => Mission) requested;
