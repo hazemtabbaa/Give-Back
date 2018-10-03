@@ -69,8 +69,8 @@ contract Charity{
         Mission memory mission;
         mission.organization = _organization;
         //mission.receiver = recAddress;
-        mission.fundGoal = _fundGoal
-        missions[organization] = mission;
+        mission.fundGoal = _fundGoal;
+        missions[_organization] = mission;
         missionCounter++;
         emit CreatedMission(_organization, _fundGoal);
     }
