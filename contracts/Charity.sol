@@ -71,7 +71,7 @@ contract Charity{
         //mission.receiver = recAddress;
         mission.fundGoal = _fundGoal;
         missions[_organization] = mission;
-        missionCounter++;
+        missionCounter = missionCounter.add(1);
         emit CreatedMission(_organization, _fundGoal);
     }
 
@@ -90,7 +90,7 @@ contract Charity{
 
     //@dev allow owner to change fundGoal for mission
     function addFundGoal(string _org, uint _fundGoal) isOwner public returns(uint){
-       Mission storage mission = missions[org];
+       Mission storage mission = missions[_org];
        mission.fundGoal = mission.fundGoal.add(_fundGoal);
        emit AddedFundGoal(_org, _fundGoal);
        return mission.fundGoal;
