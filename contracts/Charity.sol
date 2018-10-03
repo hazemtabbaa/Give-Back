@@ -100,9 +100,9 @@ contract Charity{
         return address(this).balance;
     }
 
-    function getGenericDonations() view public returns(uint){
+    /*function getGenericDonations() view public returns(uint){
       return multipurposeBalance;
-    }
+    }*/
 
 
 }
