@@ -15,6 +15,8 @@ contract Contributions is Charity{
     //@dev allows user to request a mission to be added to charity
     //add requested mission to list of waiting for approval
     function requestMission(string org) public{
+        //require that mission does not already exist
+        require(missions[org].fundGoal != 0 );
         Mission memory pendingMission;
         pendingMission.organization = org;
         pendingMission.requester = msg.sender;
@@ -27,6 +29,7 @@ contract Contributions is Charity{
     function approveRequest(string org) isOwner public{
         Mission storage mission = requested[org];
         missions[org] = mission;
+        missionCounter = missionCounter.add(1);
         //TODO add address
         delete requested[org];
         emit Approve(org);
