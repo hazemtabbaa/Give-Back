@@ -47,10 +47,13 @@ contract Charity{
         uint contributorCount;
         //amountBalance eth left in balance to give back
         uint amountBalance;
+        //total amount donated disregarding "givebacks"
         uint amountDonated;
         string organization;
         uint date;
         uint fundGoal;
+        //amount needed to reach fund goal
+        uint toReachFundGoal;
         address requester;
     }
 
@@ -103,6 +106,11 @@ contract Charity{
     /*function getGenericDonations() view public returns(uint){
       return multipurposeBalance;
     }*/
+
+    function donationsToFundGoal(string _org) public view returns(uint){
+      Mission storage mission = missions[_org];
+      return mission.toReachFundGoal;
+    }
 
 
 }
