@@ -45,7 +45,7 @@ contract Contributions is Charity{
         //Add fundgoal function or add in instantiation otherwise donate
         //will revert on require since fundGoal = 0
         require(mission.fundGoal > (mission.amountDonated.add(amount)));
-        mission.amountBalance = mission.amountBalance.add(amount);
+        mission.availableAmount = mission.availableAmount.add(amount);
         //totalDonations = totalDonations.add(amount);
         //mission.contributors.push(msg.sender);
         mission.contributors[msg.sender] = 1;
@@ -66,9 +66,9 @@ contract Contributions is Charity{
     }
 
     //@dev return mission balance
-    function getMissionBalance(string org) public view returns(uint){
+    function getAvailableToGiveMission(string org) public view returns(uint){
         Mission storage mission = missions[org];
-        return mission.amountBalance;
+        return mission.availableAmount;
     }
     //@dev get total amount donated since the beginning
     // i.e. disregarding "give-backs"
