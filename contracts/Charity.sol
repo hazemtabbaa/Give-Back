@@ -18,7 +18,7 @@ contract Charity{
     }
 
     event Donated(address indexed from, uint amount, string organization);
-    event Given(address indexed to, uint amount, string organization);
+    event Given(uint amount, string indexed organization);
     event CreatedMission(string indexed org, uint fundGoal);
     event AddedFundGoal(string indexed org, uint fundGoal);
 
@@ -85,7 +85,8 @@ contract Charity{
     }
 
     //@dev owner distributes specific mission's amount
-    function giveBack(address to, string org, uint amount) isOwner public{
+    //@dev removed address to argument
+    function giveBack(string org, uint amount) isOwner public{
         Mission storage mission = missions[org];
         require(mission.contributorCount != 0x0);
         require(mission.availableAmount > amount);
@@ -93,7 +94,7 @@ contract Charity{
         mission.orgAddr.transfer(amount);
         //to.transfer(amount);
         mission.availableAmount = mission.availableAmount.sub(amount);
-        emit Given(to, amount, org);
+        emit Given(amount, org);
     }
 
 
