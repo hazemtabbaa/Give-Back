@@ -1,6 +1,7 @@
 pragma solidity ^0.4.24;
 
 import "./SafeMath.sol";
+import "./OrgContract.sol";
 
 contract Charity{
     using SafeMath for uint;
@@ -45,16 +46,17 @@ contract Charity{
         mapping(address => uint) addressDonations;
         //address[] contributors;
         uint contributorCount;
-        //amountBalance eth left in balance to give back
-        uint amountBalance;
+        //availableAmount eth left in balance to give back
+        uint availableAmount;
         //total amount donated disregarding "givebacks"
         uint amountDonated;
         string organization;
         uint date;
         uint fundGoal;
-        //amount needed to reach fund goal
-        uint toReachFundGoal;
         address requester;
+
+        //organization address
+        address orgAddr;
     }
 
     mapping(string => Mission) missions;
@@ -75,6 +77,10 @@ contract Charity{
         mission.fundGoal = _fundGoal;
         missions[_organization] = mission;
         missionCounter = missionCounter.add(1);
+
+        //Creating new address for the org
+        mission.orgAddr = new OrgContract(_organization);
+
         emit CreatedMission(_organization, _fundGoal);
     }
 
@@ -82,11 +88,11 @@ contract Charity{
     function giveBack(address to, string org, uint amount) isOwner public{
         Mission storage mission = missions[org];
         require(mission.contributorCount != 0x0);
-        require(mission.amountBalance > amount);
+        require(mission.availableAmount > amount);
         require(address(this).balance >= amount);
-        to.transfer(amount);
-        //mission.fundGoal = mission.fundGoal.sub(amount);
-        mission.amountBalance = mission.amountBalance.sub(amount);
+        mission.orgAddr.transfer(amount);
+        //to.transfer(amount);
+        mission.availableAmount = mission.availableAmount.sub(amount);
         emit Given(to, amount, org);
     }
 
@@ -107,9 +113,10 @@ contract Charity{
       return multipurposeBalance;
     }*/
 
+    //@dev returns amount needed to reach the fund goal
     function donationsToFundGoal(string _org) public view returns(uint){
       Mission storage mission = missions[_org];
-      return mission.toReachFundGoal;
+      return (mission.fundGoal.sub(mission.amountDonated));
     }
 
 
