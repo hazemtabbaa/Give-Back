@@ -19,7 +19,7 @@ contract Charity{
 
     event Donated(address indexed from, uint amount, string organization);
     event Given(uint amount, string indexed organization);
-    event CreatedMission(string indexed org, uint fundGoal);
+    event CreatedMission(string indexed org, uint fundGoal, address indexed orgHead);
     event AddedFundGoal(string indexed org, uint fundGoal);
 
     constructor() public{
@@ -40,23 +40,19 @@ contract Charity{
     // @dev struct to store collection of donations given to one organization
     // and store its Impact
     struct Mission{
-        //address receiver;
         //TODO get Contributor amount
         mapping(address => uint8) contributors;
         mapping(address => uint) addressDonations;
-        //address[] contributors;
-        uint contributorCount;
-        //availableAmount eth left in balance to give back
-        uint availableAmount;
-        //total amount donated disregarding "givebacks"
-        uint amountDonated;
+        uint contributorCount; //address[] contributors;
+        uint availableAmount; //availableAmount eth left in balance to give back
+        uint amountDonated; //total amount donated disregarding "givebacks"
         string organization;
         uint date;
         uint fundGoal;
         address requester;
+        address orgAddr; //organization address
+        address orgHead; //head of organization
 
-        //organization address
-        address orgAddr;
     }
 
     mapping(string => Mission) missions;
@@ -70,23 +66,26 @@ contract Charity{
     }
 
     //@dev allows owner to create new mission with org name
-    function createMission(string _organization, uint _fundGoal) isOwner public{
+    function createMission(string _organization, uint _fundGoal, address _orgHead)
+      isOwner public{
         Mission memory mission;
         mission.organization = _organization;
+        mission.orgHead = _orgHead;
         //mission.receiver = recAddress;
         mission.fundGoal = _fundGoal;
         missions[_organization] = mission;
         missionCounter = missionCounter.add(1);
 
         //Creating new address for the org
-        mission.orgAddr = new OrgContract(_organization);
+        mission.orgAddr = new OrgContract(_organization, _orgHead);
 
-        emit CreatedMission(_organization, _fundGoal);
+        emit CreatedMission(_organization, _fundGoal, _orgHead);
     }
 
     //@dev owner distributes specific mission's amount
     //@dev removed address to argument
-    function giveBack(string org, uint amount) isOwner public{
+    function giveBack(string org, uint amount)
+      isOwner public{
         Mission storage mission = missions[org];
         require(mission.contributorCount != 0x0);
         require(mission.availableAmount > amount);
@@ -99,14 +98,16 @@ contract Charity{
 
 
     //@dev allow owner to change fundGoal for mission
-    function addFundGoal(string _org, uint _fundGoal) isOwner public returns(uint){
+    function addFundGoal(string _org, uint _fundGoal)
+      isOwner public returns(uint){
        Mission storage mission = missions[_org];
        mission.fundGoal = mission.fundGoal.add(_fundGoal);
        emit AddedFundGoal(_org, _fundGoal);
        return mission.fundGoal;
     }
 
-    function getBalance() view public returns(uint){
+    function getBalance()
+      view public returns(uint){
         return address(this).balance;
     }
 
@@ -115,7 +116,8 @@ contract Charity{
     }*/
 
     //@dev returns amount needed to reach the fund goal
-    function donationsToFundGoal(string _org) public view returns(uint){
+    function donationsToFundGoal(string _org)
+      public view returns(uint){
       Mission storage mission = missions[_org];
       return (mission.fundGoal.sub(mission.amountDonated));
     }
