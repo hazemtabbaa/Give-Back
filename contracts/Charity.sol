@@ -18,9 +18,9 @@ contract Charity{
     }
 
     event Donated(address indexed from, uint amount, string organization);
-    event Given(uint amount, string indexed organization);
-    event CreatedMission(string indexed org, uint fundGoal, address indexed orgHead);
-    event AddedFundGoal(string indexed org, uint fundGoal);
+    event Given(uint amount, string organization);
+    event CreatedMission(string org, uint fundGoal, address indexed orgHead);
+    event AddedFundGoal(string org, uint fundGoal);
 
     constructor() public{
         //TODO add balance
