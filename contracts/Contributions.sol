@@ -16,7 +16,7 @@ contract Contributions is Charity{
     //add requested mission to list of waiting for approval
     function requestMission(string org) public{
         //require that mission does not already exist
-        require(missions[org].fundGoal != 0 );
+        //require(missions[org].fundGoal != 0 );
         Mission memory pendingMission;
         pendingMission.organization = org;
         pendingMission.requester = msg.sender;
