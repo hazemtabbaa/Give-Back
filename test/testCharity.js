@@ -7,7 +7,7 @@ contract('Charity', function(accounts) {
   var firstDonor = accounts[3];
   var secondDonor = accounts[4];
 
-  var charity;
+  //var charity;
 
   /*beforeEach('setup contract for each test', async function () {
           charity = await Charity.new();
@@ -23,11 +23,13 @@ contract('Charity', function(accounts) {
     assert.equal(1,1);
   });*/
 
-  /*it('should create new mission', function(){
-    return Charity.deployed().then(function(instance) {
-           // set contract instance into a variable
-           charity = instance;
-  });*/
+  it('should create new mission', async function(){
+    let charity = await Charity.deployed();
+    await charity.createMission('first', 10,firstOrg);
+    let missionCount = await charity.missionCounter.call();
+    console.log(charity.missionCounter());
+    assert.equal(missionCount, 1);
+  })
 
   it('should pass this test', function(){
     assert.equal(1,1);
