@@ -1,4 +1,4 @@
-var Charity = artifacts.require('./Charity.sol');
+/*var Charity = artifacts.require('./Charity.sol');
 var Contributions = artifacts.require('./Contributions.sol');
 
 contract('Charity', function(accounts) {
@@ -17,7 +17,7 @@ contract('Charity', function(accounts) {
 
   /*it('should have a valid owner', async function() {
     assert.equal(charity.owner(), owner);
-  });*/
+  });
 
   //Testing for correct number of missions after creating a new one
   it('should create one new mission', async function(){
@@ -43,6 +43,15 @@ contract('Charity', function(accounts) {
       //await console.log(missionCount);
       await assert.equal(missionCount, 1);
     });
+
+    it('should return correct mission', async function(){
+      let contributions = await Contributions.deployed();
+      await contributions.requestMission.call('requesting2');
+      await contributions.approveRequest.call('requesting2');
+      let orgName = contributions.missions['requesting2'];
+      assert.exists(orgName);
+    });
+
   });
 
   it('should pass this test', function(){
@@ -50,3 +59,4 @@ contract('Charity', function(accounts) {
   });
 
 })
+*/
