@@ -5,38 +5,51 @@ import "./SafeMath.sol";
 contract Contributions is Charity{
     using SafeMath for uint;
     event Request(address indexed from, string org);
-    event Approve(string indexed org);
+    event Approve(string org);
+
+
+    event Debug(string debug);
 
     //Mission[] public requested;
-    mapping(string => Mission) requested;
+    mapping(string => uint) requested;
     //@dev map to store total contributions of specific address
     mapping(address=>uint) donorContributions;
 
     //@dev allows user to request a mission to be added to charity
     //add requested mission to list of waiting for approval
     function requestMission(string org) public{
-        //require that mission does not already exist
-        //require(missions[org].fundGoal != 0 );
-        Mission memory pendingMission;
+        //require that mission doesn't already exist
+        require(existingMissions[org] == 0);
+        //require that mission has not been already requested
+        require(requested[org] == 0 );
+        /*Mission memory pendingMission;
         pendingMission.organization = org;
         pendingMission.requester = msg.sender;
-        requested[org] = pendingMission;
+        requested[org] = pendingMission;*/
+        requested[org] = 1;
         emit Request(msg.sender, org);
     }
 
     //@dev allows owner to approve request for new mission
     //delete mission from pending list
-    function approveRequest(string org) isOwner public{
-        Mission storage mission = requested[org];
+    function approveRequest(string org, uint _fundGoal, address _orgHead)
+    isOwner public{
+        createMission(org, _fundGoal, _orgHead);
+        /*Mission storage mission = requested[org];
         missions[org] = mission;
         missionCounter = missionCounter.add(1);
+        mission.fundGoal = _fundGoal;*/
         //TODO add address
-        delete requested[org];
+
+        //setting requested = 2 means mission already approved
+        //if requested = 0 then mission has never been requested
+        requested[org] = 2;
         emit Approve(org);
     }
 
     //@dev contributors donate to their specific mission via organization name
     function donate(string org) payable public{
+        emit Debug("before first require");
         uint amount = msg.value;
         require(amount > 0);
         donors[msg.sender] = 1;
@@ -44,7 +57,9 @@ contract Contributions is Charity{
         //TODO fix require:
         //Add fundgoal function or add in instantiation otherwise donate
         //will revert on require since fundGoal = 0
+        emit Debug("after first require");
         require(mission.fundGoal > (mission.amountDonated.add(amount)));
+        emit Debug("after second require");
         mission.availableAmount = mission.availableAmount.add(amount);
         //totalDonations = totalDonations.add(amount);
         //mission.contributors.push(msg.sender);
