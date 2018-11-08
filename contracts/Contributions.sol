@@ -8,7 +8,7 @@ contract Contributions is Charity{
     event Approve(string org);
 
 
-    event Debug(string debug);
+    event Debug(string debug, address addr, uint val2);
 
     //Mission[] public requested;
     mapping(string => uint) requested;
@@ -48,19 +48,26 @@ contract Contributions is Charity{
     }
 
     //@dev contributors donate to their specific mission via organization name
+    //NEW AND CHANGED FUNCTIONALITY:
+    //@dev msg.value now goes directly to mission without the need for passing
+    //through the governing body
     function donate(string org) payable public{
-        emit Debug("before first require");
         uint amount = msg.value;
-        require(amount > 0);
+        //emit Debug("msgval = ", msg.value);
+        require(msg.value > 0 ether);
         donors[msg.sender] = 1;
         Mission storage mission = missions[org];
         //TODO fix require:
         //Add fundgoal function or add in instantiation otherwise donate
         //will revert on require since fundGoal = 0
-        emit Debug("after first require");
-        require(mission.fundGoal > (mission.amountDonated.add(amount)));
-        emit Debug("after second require");
-        mission.availableAmount = mission.availableAmount.add(amount);
+        //emit Debug("after first require", address(mission.orgContract),1);
+        //uint oneEther = 1 ether;
+        //uint tempAmountDonated = mission.amountDonated.add(amount) * oneEther;
+        //emit Debug(">>>>check", mission.fundGoal,tempAmountDonated);
+        //require(mission.fundGoal > (tempAmountDonated));
+        address(mission.orgContract).transfer(msg.value); //Transferring amount to org contract
+        //emit Debug("BALANCE", address(mission.orgContract),address(mission.orgContract).balance);
+        //mission.availableAmount = mission.availableAmount.add(amount);
         //totalDonations = totalDonations.add(amount);
         //mission.contributors.push(msg.sender);
         mission.contributors[msg.sender] = 1;
@@ -69,6 +76,7 @@ contract Contributions is Charity{
         mission.date = now;
         mission.amountDonated = mission.amountDonated.add(amount);
         donorContributions[msg.sender] = donorContributions[msg.sender].add(msg.value);
+        testAddrBalance = testAddr.balance;
         emit Donated(msg.sender, amount, org);
     }
 
@@ -81,9 +89,10 @@ contract Contributions is Charity{
     }
 
     //@dev return mission balance
-    function getAvailableToGiveMission(string org) public view returns(uint){
+    function getMissionBalance(string org) public view returns(uint){
         Mission storage mission = missions[org];
-        return mission.availableAmount;
+        return address(mission.orgContract).balance;
+        //return mission.availableAmount;
     }
     //@dev get total amount donated since the beginning
     // i.e. disregarding "give-backs"
