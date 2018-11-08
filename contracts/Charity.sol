@@ -37,6 +37,9 @@ contract Charity{
     //@dev map to store if address has donated or not
     mapping(address=>uint8) donors;
 
+    //@dev mapping to avoid creating duplicate missions
+    mapping(string=>uint8) existingMissions;
+
     // @dev struct to store collection of donations given to one organization
     // and store its Impact
     struct Mission{
@@ -68,6 +71,9 @@ contract Charity{
     //@dev allows owner to create new mission with org name
     function createMission(string _organization, uint _fundGoal, address _orgHead)
       isOwner public{
+        //prevent user from "shooting themselves in foot" by creating duplicate
+        //missions
+        require(existingMissions[_organization] == 0);
         Mission memory mission;
         mission.organization = _organization;
         mission.orgHead = _orgHead;
@@ -78,6 +84,9 @@ contract Charity{
 
         //Creating new address for the org
         mission.orgAddr = new OrgContract(_organization, _orgHead);
+
+        //set existingMissions to 1;
+        existingMissions[_organization] = 1;
 
         emit CreatedMission(_organization, _fundGoal, _orgHead);
     }
