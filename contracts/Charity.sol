@@ -11,6 +11,8 @@ contract Charity{
     uint public multipurposeBalance;
     uint public missionCounter;
     //uint comments;
+    address public testAddr;
+    uint public testAddrBalance;
 
     modifier isOwner{
         require(msg.sender == owner);
@@ -47,13 +49,14 @@ contract Charity{
         mapping(address => uint8) contributors;
         mapping(address => uint) addressDonations;
         uint contributorCount; //address[] contributors;
-        uint availableAmount; //availableAmount eth left in balance to give back
+        //uint availableAmount; //availableAmount eth left in balance to give back
         uint amountDonated; //total amount donated disregarding "givebacks"
         string organization;
         uint date;
         uint fundGoal;
         address requester;
-        address orgAddr; //organization address
+        OrgContract orgContract;
+        //address orgAddr; //organization address
         address orgHead; //head of organization
 
     }
@@ -78,15 +81,23 @@ contract Charity{
         mission.organization = _organization;
         mission.orgHead = _orgHead;
         //mission.receiver = recAddress;
+        //setting fundGoal to ether
+        //uint oneEther = 1 ether;
+        //_fundGoal = _fundGoal * oneEther;
         mission.fundGoal = _fundGoal;
         missions[_organization] = mission;
         missionCounter = missionCounter.add(1);
 
         //Creating new address for the org
-        mission.orgAddr = new OrgContract(_organization, _orgHead);
+        mission.orgContract = new OrgContract(_organization, _orgHead);
+        //mission.orgAddr = new OrgContract(_organization, _orgHead);
+        testAddr = address(mission.orgContract);
+        testAddrBalance = testAddr.balance;
+
 
         //set existingMissions to 1;
         existingMissions[_organization] = 1;
+
 
         emit CreatedMission(_organization, _fundGoal, _orgHead);
     }
@@ -97,11 +108,11 @@ contract Charity{
       isOwner public{
         Mission storage mission = missions[org];
         require(mission.contributorCount != 0x0);
-        require(mission.availableAmount > amount);
+        //require(mission.availableAmount > amount);
         require(address(this).balance >= amount);
-        mission.orgAddr.transfer(amount);
+        address(mission.orgContract).transfer(amount);
         //to.transfer(amount);
-        mission.availableAmount = mission.availableAmount.sub(amount);
+        //mission.availableAmount = mission.availableAmount.sub(amount);
         emit Given(amount, org);
     }
 
