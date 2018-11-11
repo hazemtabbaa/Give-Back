@@ -1,6 +1,7 @@
 pragma solidity ^0.4.24;
 import "./Charity.sol";
 import "./SafeMath.sol";
+import "./OrgContract.sol";
 
 contract Contributions is Charity{
     using SafeMath for uint;
@@ -8,25 +9,23 @@ contract Contributions is Charity{
     event Approve(string org);
 
 
-    event Debug(string debug, address addr, uint val2);
+    //event Debug(string debug, address addr, uint val2);
+    event Debug(string debug, uint val);
 
     //Mission[] public requested;
-    mapping(string => uint) requested;
+    mapping(uint => uint) requested;
     //@dev map to store total contributions of specific address
-    mapping(address=>uint) donorContributions;
+    mapping(address=>uint) public donorContributions;
+
 
     //@dev allows user to request a mission to be added to charity
     //add requested mission to list of waiting for approval
     function requestMission(string org) public{
         //require that mission doesn't already exist
-        require(existingMissions[org] == 0);
+        require(existingMissions[uint(keccak256(abi.encodePacked(org)))] == 0);
         //require that mission has not been already requested
-        require(requested[org] == 0 );
-        /*Mission memory pendingMission;
-        pendingMission.organization = org;
-        pendingMission.requester = msg.sender;
-        requested[org] = pendingMission;*/
-        requested[org] = 1;
+        require(requested[uint(keccak256(abi.encodePacked(org)))] == 0 );
+        requested[uint(keccak256(abi.encodePacked(org)))] = 1;
         emit Request(msg.sender, org);
     }
 
@@ -34,16 +33,12 @@ contract Contributions is Charity{
     //delete mission from pending list
     function approveRequest(string org, uint _fundGoal, address _orgHead)
     isOwner public{
+        require(requested[uint(keccak256(abi.encodePacked(org)))] == 1);
         createMission(org, _fundGoal, _orgHead);
-        /*Mission storage mission = requested[org];
-        missions[org] = mission;
-        missionCounter = missionCounter.add(1);
-        mission.fundGoal = _fundGoal;*/
         //TODO add address
-
         //setting requested = 2 means mission already approved
         //if requested = 0 then mission has never been requested
-        requested[org] = 2;
+        requested[uint(keccak256(abi.encodePacked(org)))] = 2;
         emit Approve(org);
     }
 
@@ -56,19 +51,17 @@ contract Contributions is Charity{
         //emit Debug("msgval = ", msg.value);
         require(msg.value > 0 ether);
         donors[msg.sender] = 1;
-        Mission storage mission = missions[org];
+        Mission storage mission = missions[uint(keccak256(abi.encodePacked(org)))];
+        //Mission mission = missions(org);
         //TODO fix require:
-        //Add fundgoal function or add in instantiation otherwise donate
-        //will revert on require since fundGoal = 0
         //emit Debug("after first require", address(mission.orgContract),1);
         //uint oneEther = 1 ether;
-        //uint tempAmountDonated = mission.amountDonated.add(amount) * oneEther;
-        //emit Debug(">>>>check", mission.fundGoal,tempAmountDonated);
         //require(mission.fundGoal > (tempAmountDonated));
-        address(mission.orgContract).transfer(msg.value); //Transferring amount to org contract
-        //emit Debug("BALANCE", address(mission.orgContract),address(mission.orgContract).balance);
-        //mission.availableAmount = mission.availableAmount.add(amount);
+        //address(mission.orgContract).transfer(msg.value);
+        emit Debug("Stops here -> ", 1);
+        missionAddresses[uint(keccak256(abi.encodePacked(org)))].transfer(msg.value); //Transferring amount to org contract
         //totalDonations = totalDonations.add(amount);
+        emit Debug("Stops after -> ", 2);
         //mission.contributors.push(msg.sender);
         mission.contributors[msg.sender] = 1;
         mission.addressDonations[msg.sender] = mission.addressDonations[msg.sender].add(amount);
@@ -76,7 +69,7 @@ contract Contributions is Charity{
         mission.date = now;
         mission.amountDonated = mission.amountDonated.add(amount);
         donorContributions[msg.sender] = donorContributions[msg.sender].add(msg.value);
-        testAddrBalance = testAddr.balance;
+
         emit Donated(msg.sender, amount, org);
     }
 
@@ -90,15 +83,28 @@ contract Contributions is Charity{
 
     //@dev return mission balance
     function getMissionBalance(string org) public view returns(uint){
-        Mission storage mission = missions[org];
-        return address(mission.orgContract).balance;
+        //Mission storage mission = missions[uint(keccak256(abi.encodePacked(org)))];
+        return missionAddresses[uint(keccak256(abi.encodePacked(org)))].balance;
+        //return mission.orgContract.getOrgBalance();
         //return mission.availableAmount;
     }
+
     //@dev get total amount donated since the beginning
     // i.e. disregarding "give-backs"
     function getMissionTotalDonations(string org) public view returns(uint){
-      Mission storage mission = missions[org];
+      Mission storage mission = missions[uint(keccak256(abi.encodePacked(org)))];
       require(mission.amountDonated > 0);
       return mission.amountDonated;
+    }
+
+    //@dev get the orgContract address
+    function getMissionAddress(string _org) public view returns(address){
+      require(existingMissions[uint(keccak256(abi.encodePacked(_org)))] == 1);
+      //Mission storage mission = missions[uint(keccak256(abi.encodePacked(_org)))];
+      return missionAddresses[uint(keccak256(abi.encodePacked(_org)))];
+    }
+
+    function missionExists(string _org) public view returns(uint8){
+        return existingMissions[uint(keccak256(abi.encodePacked(_org)))];
     }
 }

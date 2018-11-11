@@ -11,8 +11,7 @@ contract Charity{
     uint public multipurposeBalance;
     uint public missionCounter;
     //uint comments;
-    address public testAddr;
-    uint public testAddrBalance;
+    event debugger(string test, address addr);
 
     modifier isOwner{
         require(msg.sender == owner);
@@ -29,18 +28,15 @@ contract Charity{
         owner = msg.sender;
     }
 
-    //TODO
-    //maybe add mission address in struct or in createMission
-    //instead of manual input of address in giveBack
-
-    //TODO
-    //fix indexed keyword in events
 
     //@dev map to store if address has donated or not
-    mapping(address=>uint8) donors;
+    mapping(address=>uint8) public donors;
 
     //@dev mapping to avoid creating duplicate missions
-    mapping(string=>uint8) existingMissions;
+    mapping(uint=>uint8) public existingMissions;
+
+    //@dev mapping to store all addresses of created orgContracts
+    mapping(uint=>address) public missionAddresses;
 
     // @dev struct to store collection of donations given to one organization
     // and store its Impact
@@ -49,19 +45,19 @@ contract Charity{
         mapping(address => uint8) contributors;
         mapping(address => uint) addressDonations;
         uint contributorCount; //address[] contributors;
-        //uint availableAmount; //availableAmount eth left in balance to give back
         uint amountDonated; //total amount donated disregarding "givebacks"
         string organization;
         uint date;
         uint fundGoal;
         address requester;
         OrgContract orgContract;
-        //address orgAddr; //organization address
         address orgHead; //head of organization
+        //address orgAddr;
 
     }
 
-    mapping(string => Mission) missions;
+    //mapping(string => Mission) missions;
+    mapping(uint => Mission) public missions;
 
     //@dev fallback for any donation received, used for multipurpose balance
     //TODO check if fallback should be removed
@@ -76,7 +72,7 @@ contract Charity{
       isOwner public{
         //prevent user from "shooting themselves in foot" by creating duplicate
         //missions
-        require(existingMissions[_organization] == 0);
+        require(existingMissions[uint(keccak256(abi.encodePacked(_organization)))] == 0);
         Mission memory mission;
         mission.organization = _organization;
         mission.orgHead = _orgHead;
@@ -85,19 +81,16 @@ contract Charity{
         //uint oneEther = 1 ether;
         //_fundGoal = _fundGoal * oneEther;
         mission.fundGoal = _fundGoal;
-        missions[_organization] = mission;
+        missions[uint(keccak256(abi.encodePacked(_organization)))] = mission;
         missionCounter = missionCounter.add(1);
 
         //Creating new address for the org
         mission.orgContract = new OrgContract(_organization, _orgHead);
         //mission.orgAddr = new OrgContract(_organization, _orgHead);
-        testAddr = address(mission.orgContract);
-        testAddrBalance = testAddr.balance;
-
-
+        //mission.orgAddr = address(mission.orgContract);
         //set existingMissions to 1;
-        existingMissions[_organization] = 1;
-
+        existingMissions[uint(keccak256(abi.encodePacked(_organization)))] = 1;
+        missionAddresses[uint(keccak256(abi.encodePacked(_organization)))] = mission.orgContract;
 
         emit CreatedMission(_organization, _fundGoal, _orgHead);
     }
@@ -106,7 +99,7 @@ contract Charity{
     //@dev removed address to argument
     function giveBack(string org, uint amount)
       isOwner public{
-        Mission storage mission = missions[org];
+        Mission storage mission = missions[uint(keccak256(abi.encodePacked(org)))];
         require(mission.contributorCount != 0x0);
         //require(mission.availableAmount > amount);
         require(address(this).balance >= amount);
@@ -120,7 +113,7 @@ contract Charity{
     //@dev allow owner to change fundGoal for mission
     function addFundGoal(string _org, uint _fundGoal)
       isOwner public returns(uint){
-       Mission storage mission = missions[_org];
+       Mission storage mission = missions[uint(keccak256(abi.encodePacked(_org)))];
        mission.fundGoal = mission.fundGoal.add(_fundGoal);
        emit AddedFundGoal(_org, _fundGoal);
        return mission.fundGoal;
@@ -138,7 +131,7 @@ contract Charity{
     //@dev returns amount needed to reach the fund goal
     function donationsToFundGoal(string _org)
       public view returns(uint){
-      Mission storage mission = missions[_org];
+      Mission storage mission = missions[uint(keccak256(abi.encodePacked(_org)))];
       return (mission.fundGoal.sub(mission.amountDonated));
     }
 
