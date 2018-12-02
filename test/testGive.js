@@ -131,6 +131,11 @@ contract('Charity', function(accounts) {
       let exists = await contributions.missionExists('first');
       console.log("exists = ", exists.toNumber());
 
+      await contributions.verifyDonation({
+        from:firstDonor,
+        gasPrice:0
+      });
+
       let secondOrgBalance = await contributions.getMissionBalance('first');
       secondOrgBalance = secondOrgBalance.toNumber();
       //orgBalance = orgBalance + totalGas;
