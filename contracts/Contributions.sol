@@ -7,6 +7,7 @@ contract Contributions is Charity{
     using SafeMath for uint;
     event Request(address indexed from, string org);
     event Approve(string org);
+    event DonorChoice(address donor, string org);
 
 
     //event Debug(string debug, address addr, uint val2);
@@ -46,31 +47,51 @@ contract Contributions is Charity{
     //NEW AND CHANGED FUNCTIONALITY:
     //@dev msg.value now goes directly to mission without the need for passing
     //through the governing body
-    function donate(string org) payable public{
-        uint amount = msg.value;
-        //emit Debug("msgval = ", msg.value);
-        require(msg.value > 0 ether);
+    function donate(string _org) payable public{
+        require(msg.value > 0);
+        require(existingMissions[uint(keccak256(abi.encodePacked(_org)))] == 1);
+
+        Mission storage mission = missions[uint(keccak256(abi.encodePacked(_org)))];
+
+        donorAmount[msg.sender] = msg.value;
         donors[msg.sender] = 1;
-        Mission storage mission = missions[uint(keccak256(abi.encodePacked(org)))];
+        donorChoice[msg.sender] = uint(keccak256(abi.encodePacked(_org)));
+
+        mission.contributors[msg.sender] = 1;
+        mission.addressDonations[msg.sender] = mission.addressDonations[msg.sender].add(msg.value);
+        mission.contributorCount = mission.contributorCount.add(1);
+        mission.date = now;
+        mission.amountDonated = mission.amountDonated.add(msg.value);
+        donorContributions[msg.sender] = donorContributions[msg.sender].add(msg.value);
+
+        emit Donated(msg.sender, msg.value, _org);
+    }
+
+    //@dev let donor verify donations
+    //has to be separate method because solidity (??) cannot accept ether
+    //and transfer in the same function
+    function verifyDonation() public{
+        //uint amount = msg.value;
+        //emit Debug("msgval = ", msg.value);
+        //require(msg.value > 0);
+        uint org = donorChoice[msg.sender];
+        require(existingMissions[org] == 1);
+        //Mission storage mission = missions[org];
         //Mission mission = missions(org);
         //TODO fix require:
         //emit Debug("after first require", address(mission.orgContract),1);
         //uint oneEther = 1 ether;
         //require(mission.fundGoal > (tempAmountDonated));
         //address(mission.orgContract).transfer(msg.value);
-        emit Debug("Stops here -> ", 1);
-        missionAddresses[uint(keccak256(abi.encodePacked(org)))].transfer(msg.value); //Transferring amount to org contract
-        //totalDonations = totalDonations.add(amount);
-        emit Debug("Stops after -> ", 2);
-        //mission.contributors.push(msg.sender);
-        mission.contributors[msg.sender] = 1;
-        mission.addressDonations[msg.sender] = mission.addressDonations[msg.sender].add(amount);
-        mission.contributorCount = mission.contributorCount.add(1);
-        mission.date = now;
-        mission.amountDonated = mission.amountDonated.add(amount);
-        donorContributions[msg.sender] = donorContributions[msg.sender].add(msg.value);
 
-        emit Donated(msg.sender, amount, org);
+        uint donation = donorAmount[msg.sender];
+        //require(getBalance() >= donation);
+        //msg.sender.transfer(donation);
+        //TODO: reverting on transfer for this address
+        missionAddresses[org].transfer(donation); //Transferring amount to org contract
+        //totalDonations = totalDonations.add(amount);
+        //mission.contributors.push(msg.sender);
+
     }
 
     //@dev allow donations without specific organization
