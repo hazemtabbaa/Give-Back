@@ -4,6 +4,7 @@ import "./SafeMath.sol";
 import "./OrgContract.sol";
 
 contract Charity{
+    //TODO: Implement Ownable.sol
     using SafeMath for uint;
 
     address private owner;
@@ -31,6 +32,11 @@ contract Charity{
 
     //@dev map to store if address has donated or not
     mapping(address=>uint8) public donors;
+
+    //@dev mapping to store donor's current org choice
+    mapping(address=>uint) public donorChoice;
+    //@dev mapping to store donor's current donation amount
+    mapping(address=>uint) public donorAmount;
 
     //@dev mapping to avoid creating duplicate missions
     mapping(uint=>uint8) public existingMissions;
