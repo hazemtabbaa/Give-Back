@@ -70,25 +70,18 @@ contract Contributions is Charity{
     //@dev let donor verify donations
     //has to be separate method because solidity (??) cannot accept ether
     //and transfer in the same function
-    function verifyDonation() public{
-        //uint amount = msg.value;
-        //emit Debug("msgval = ", msg.value);
-        //require(msg.value > 0);
-        uint org = donorChoice[msg.sender];
-        require(existingMissions[org] == 1);
-        //Mission storage mission = missions[org];
-        //Mission mission = missions(org);
-        //TODO fix require:
-        //emit Debug("after first require", address(mission.orgContract),1);
-        //uint oneEther = 1 ether;
-        //require(mission.fundGoal > (tempAmountDonated));
-        //address(mission.orgContract).transfer(msg.value);
+    function verifyDonation(string _org) payable public{
+        //uint org = donorChoice[msg.sender];
+        uint org = uint(keccak256(abi.encodePacked(_org)));
+        //require(existingMissions[org] == 1);
+        require(missionExists(_org) == 1);
 
         uint donation = donorAmount[msg.sender];
         //require(getBalance() >= donation);
         //msg.sender.transfer(donation);
         //TODO: reverting on transfer for this address
-        missionAddresses[org].transfer(donation); //Transferring amount to org contract
+        //missionAddresses[org].transfer(1); //Transferring amount to org contract
+        missionAddresses[org].call.value(donation).gas(20317)();
         //totalDonations = totalDonations.add(amount);
         //mission.contributors.push(msg.sender);
 
