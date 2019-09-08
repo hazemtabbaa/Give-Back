@@ -22,6 +22,8 @@ import "./Charity.sol";
      orgOwner = _orgHead;
    }
 
+   function() payable public{}
+
    function getOrgBalance()
     view public returns(uint){
      return address(this).balance;
@@ -35,4 +37,5 @@ import "./Charity.sol";
      purchases.push(_purchase);
      return true;
    }
+
  }
